@@ -19,7 +19,9 @@ class TCPRenoSender:
 		self.parentHost = parentHost#pointer to host which this is running on
 		self.windowList = []		#Vector to store window sizes over time
 		self.maxSeq = self.bytesToSend/1024
-		
+		self.rtt_seq_num = 0		# seq number that tracks RTT (for congestion avoidance )i
+		self.rtt_flag = False
+
 	def timeout(self):
 		self.ssthresh = self.window/2
 		self.window = 1
@@ -30,7 +32,17 @@ class TCPRenoSender:
 		self.parentHost.attemptTransmit()
 		
 	def createPacketsInRange(self,start,end):	#clearly the range exludes end
+		## DEBUG INFO
+		#print 'maxSeq: ', self.maxSeq
+		#print 'start:  ',start
+		#print 'end:    ', end
+		#print 'seq:    ', self.seq
+		#print 'window: ', self.window
+		
 		end = min(end,self.maxSeq)
+		if self.rtt_seq_num == 0:
+			self.rtt_seq_num = start
+
 		for seq in range(start,end):
 		
 			print self.parentHost.name,'TCP created a packet with sequence number',seq
@@ -46,7 +58,7 @@ class TCPRenoSender:
 	def recvPacket(self,p):
 		
 		print self.parentHost.name,'received ack',p.tcpHeader.acknowledgeNumber
-		
+		print self.parentHost.name,'RTT_NUM: ',self.rtt_seq_num
 		if p.tcpHeader.acknowledgeNumber == self.largestACK:
 			print self.parentHost.name,'received duplicate ACK ',self.largestACK
 			
@@ -63,10 +75,16 @@ class TCPRenoSender:
 			self.dupACK = 0
 			self.seq = p.tcpHeader.acknowledgeNumber
 			self.largestACK = p.tcpHeader.acknowledgeNumber
+			if self.rtt_seq_num == p.tcpHeader.acknowledgeNumber -1:
+				self.rtt_seq_num = 0
+				self.rtt_flag = True
+
 			if self.window < self.ssthresh:
-				self.window = 2*self.window
+				self.window = self.window +1
 			else:
-				self.window = self.window + 1
+				if self.rtt_flag == True:
+					self.window = self.window + 1
+					self.rtt_flag = False
 				
 			self.ssthresh = max(self.window,self.ssthresh)
 
@@ -93,17 +111,23 @@ class TCPRenoReceiver:
 		self.ack = 0
 		self.windowStart = 1
 		self.windowList = []
-		for i in range(2**11):
+		for i in range(2**14):
 			self.windowList.append(0)
 		self.srcPort = srcPort
 		self.dstPort = dstPort
 		self.ipHeader = ipHeader
 		self.lastSeqReceived = 0	
 		self.parentHost = parentHost
-		
+		self.recvTime = []			# stores the time when packet has been received (for graphing purposes)
+		self.recvPacketCount = 0
+
 	def recvPacket(self,p):
 		print self.parentHost.name,'received packet ',p.tcpHeader.sequenceNumber
-		
+
+		# Log packet receive time 
+		self.recvTime.append(globals.time)
+
+
 		i = p.tcpHeader.sequenceNumber - self.windowStart
 		self.windowList[i] = 1
 		need = 0

@@ -11,7 +11,6 @@ class Flow:
 		self.Algorithm = algo
 		self.srcPort = srcPort
 		self.dstPort = dstPort
-		
 		flowList.append(self)
 		heapq.heappush(eventQueue,(self.startTime,self))
 		
