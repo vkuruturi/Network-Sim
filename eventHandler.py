@@ -1,7 +1,12 @@
+import globals
+
 class EventHandler:
 	def __init__(self):
-		self.time = 0
+		print 'globals time : ', globals.time
+		globals.time = 0
+
 	def getTime(self):
-		return self.time
+		return globals.time
+
 	def setTime(self,t):
-		self.time = t
+		globals.time = t
