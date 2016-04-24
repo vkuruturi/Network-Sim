@@ -11,11 +11,13 @@ class Flow:
 		self.Algorithm = algo
 		self.srcPort = srcPort
 		self.dstPort = dstPort
+		self.srcTCP = []
+		self.dstTCP = []
 		flowList.append(self)
 		heappush(eventQueue,(self.startTime,self,'init'))
 		
 	def doNext(self,action):
 		if action == 'init':
-			self.source.initiateTCP(self.destination,self.dataAmount,1)
+			self.source.initiateTCP(self.destination,self.dataAmount,1,self)
 			
-			self.destination.initiateTCP(self.source,0,0)
+			self.destination.initiateTCP(self.source,0,0,self)

@@ -17,7 +17,7 @@ h = EventHandler()
 #The following is representative of inputs
 #it establishes objects - hosts routers, links, and flows
 H1 = host.Host('H1',0,'TCP Reno',h)
-H2 = host.Host('H2',1,'TCP Reno',h)
+H2 = host.Host('H2',1,'TCP Tahoe',h)
 L1 = link.Link('L1',10.0,10.0,64.0,H1,H2,h)
 F1 = flow.Flow('F1',H1,H2,2**22,4.0,'TCP Reno',80,80,h)
 F2 = flow.Flow('F2',H2,H1,2**22,4.0,'TCP Reno',81,81,h)
@@ -40,9 +40,9 @@ print 'Simulation time: ' , h.getTime()
 print 'global time var: ' , globals.time
 # graph stuff	
 
-'''	
 for i in range(len(flowList)):
-	data = flowList[i].destination.tcp[0].recvTime
+
+	data = flowList[i].dstTCP.recvTime
 	print 'First packet received at : ', data[0]
 	print 'Size of recvTime         : ', len(data)
 	max_t = math.ceil(data[len(data)-1])
@@ -67,17 +67,15 @@ for i in range(len(flowList)):
 		time_axis.append(0.05 + .1*j)
 
 	plt.plot(H1.tcp[0].windowList)
-'''
-plt.plot(L1.bufferList)
-'''
+	plt.plot(L1.bufferList)
 	fig = plt.figure()
 	plot1 = fig.add_subplot(111)
-	print 'size of time_axis: ', len(time_axis)
-	print 'size of speed    : ', len(speed)
+#	print 'size of time_axis: ', len(time_axis)
+#	print 'size of speed    : ', len(speed)
 	plot1.plot(time_axis,speed,color='blue')
 	plot1.set_xlim([0,max_t])
 	plot1.set_ylim([0,max(speed)])
-'''
+
 plt.show()	
 
 		

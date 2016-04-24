@@ -46,7 +46,7 @@ class Host:
 				return self.tcp[i]						#return it
 		print 'Error no TCP connection has that destination'
 			
-	def initiateTCP(self, destination, size, isSource):
+	def initiateTCP(self, destination, size, isSource, flow):
 		print self.name,'is initializing tcp, isSource =',isSource
 		print 'destination is',destination.name
 		self.isSource = isSource							#isSource is a bool indicating flow source
@@ -56,6 +56,7 @@ class Host:
 				ipHeader = IPHeader(maxHops, self.ipAddress, destination.ipAddress)	#create IP header
 				self.tcp.append( TCPRenoSender(size, ipHeader, self, destination, self.handler) )	#creates a new TCP connection
 				tempTCP = self.findTCP(destination,isSource)
+				flow.srcTCP = tempTCP
 				tempTCP.timeoutTime = self.handler.getTime() + tempTCP.timeoutDelay
 				heappush(eventQueue, (tempTCP.timeoutTime, tempTCP, 'checkTimeout') )
 				tempTCP.putPacket(1)								#find TCP corresponding to destination
@@ -63,8 +64,29 @@ class Host:
 			elif isSource == 0:
 				ipHeader = IPHeader(15,self.ipAddress,destination.ipAddress)		#for the case of the receiver:
 				self.tcp.append(TCPRenoReceiver(0, ipHeader,self,destination))
+				tempTCP = self.findTCP(destination,isSource)
+				flow.dstTCP = tempTCP
 			else:
 				print 'Error, not sender or receiver'
+		elif self.tcpAlgorithm == 'TCP Tahoe':
+			if isSource == 1:
+				maxHops = 15 								#this may be changed to some variable
+				ipHeader = IPHeader(maxHops, self.ipAddress, destination.ipAddress)	#create IP header
+				self.tcp.append( TCPRenoSender(size, ipHeader, self, destination, self.handler) )	#creates a new TCP connection
+				tempTCP = self.findTCP(destination,isSource)
+				flow.srcTCP = tempTCP
+				tempTCP.timeoutTime = self.handler.getTime() + tempTCP.timeoutDelay
+				heappush(eventQueue, (tempTCP.timeoutTime, tempTCP, 'checkTimeout') )
+				tempTCP.putPacket(1)								#find TCP corresponding to destination
+				self.beginTransmit()
+			elif isSource == 0:
+				ipHeader = IPHeader(15,self.ipAddress,destination.ipAddress)		#for the case of the receiver:
+				self.tcp.append(TCPRenoReceiver(0, ipHeader,self,destination))
+				tempTCP = self.findTCP(destination,isSource)
+				flow.dstTCP = tempTCP
+			else:
+				print 'Error, not sender or reciever'
+
 		else:
 			print 'Error, not a valid TCP choice'
 
