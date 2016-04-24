@@ -40,20 +40,22 @@ class Host:
 		ttp = t + (p.size/self.link.rate)			#time to push to link
 		heappush(eventQueue, (ttp, self, 'push'))
 		
-	def findTCP(self,destination):
-		for i in range( len(self.tcp) ):				#loop through all TCP's
-			if self.tcp[i].destination == destination:	#if one has a matching destination
+	def findTCP(self,destination,isSource):
+		for i in range( len(self.tcp) ):							#loop through all TCP's
+			if self.tcp[i].destination == destination and self.tcp[i].isSource == isSource:	#if one has a matching destination and source
 				return self.tcp[i]						#return it
 		print 'Error no TCP connection has that destination'
 			
 	def initiateTCP(self, destination, size, isSource):
+		print self.name,'is initializing tcp, isSource =',isSource
+		print 'destination is',destination.name
 		self.isSource = isSource							#isSource is a bool indicating flow source
 		if self.tcpAlgorithm == 'TCP Reno':
 			if isSource == 1:
 				maxHops = 15 								#this may be changed to some variable
 				ipHeader = IPHeader(maxHops, self.ipAddress, destination.ipAddress)	#create IP header
 				self.tcp.append( TCPRenoSender(size, ipHeader, self, destination, self.handler) )	#creates a new TCP connection
-				tempTCP = self.findTCP(destination)
+				tempTCP = self.findTCP(destination,isSource)
 				tempTCP.timeoutTime = self.handler.getTime() + tempTCP.timeoutDelay
 				heappush(eventQueue, (tempTCP.timeoutTime, tempTCP, 'checkTimeout') )
 				tempTCP.putPacket(1)								#find TCP corresponding to destination
@@ -67,4 +69,7 @@ class Host:
 			print 'Error, not a valid TCP choice'
 
 	def recvPacket(self,p):
-		self.findTCP(p.origSender).recvPacket(p)
+		if p.size == 64:
+			self.findTCP(p.origSender,1).recvPacket(p)
+		if p.size == 1024:
+			self.findTCP(p.origSender,0).recvPacket(p)

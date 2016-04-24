@@ -20,6 +20,7 @@ H1 = host.Host('H1',0,'TCP Reno',h)
 H2 = host.Host('H2',1,'TCP Reno',h)
 L1 = link.Link('L1',10.0,10.0,64.0,H1,H2,h)
 F1 = flow.Flow('F1',H1,H2,2**22,4.0,'TCP Reno',80,80,h)
+F2 = flow.Flow('F2',H2,H1,2**22,4.0,'TCP Reno',81,81,h)
 
 print 'Simulation is beginning'
 
@@ -33,7 +34,7 @@ while(True):
 	if len(eventQueue) == 0:
 		break
 		
-	windowList.append(H1.tcp[0].window)
+	#windowList.append(H1.tcp[0].window)
 
 print 'Simulation time: ' , h.getTime()
 print 'global time var: ' , globals.time

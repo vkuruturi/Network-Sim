@@ -5,6 +5,7 @@ from heapq import heappush
 
 class TCPRenoSender:
 	def __init__(self,dataAmt,ipHeader,parentHost,destination,h):
+		self.isSource = 1
 		self.seq = 0				#Smallest unACK'ed packet
 		self.ack = 0				#Next packet needed
 		self.window = 1				#Number of packets allowed unACK'ed
@@ -111,6 +112,7 @@ class TCPRenoSender:
 		
 class TCPRenoReceiver:
 	def __init__(self,size,ipHeader,parentHost,destination):
+		self.isSource = 0
 		self.seq = 0
 		self.ack = 0
 		self.windowStart = 1
