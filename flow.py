@@ -1,5 +1,5 @@
 from globals import *
-import heapq
+from heapq import heappush
 
 class Flow:
 	def __init__(self,name,source,destination,amount,start,algo,srcPort,dstPort,h):
@@ -12,10 +12,10 @@ class Flow:
 		self.srcPort = srcPort
 		self.dstPort = dstPort
 		flowList.append(self)
-		heapq.heappush(eventQueue,(self.startTime,self))
+		heappush(eventQueue,(self.startTime,self,'init'))
 		
-	def doNext(self):
-		self.source.initiateTCP(self.destination,self.dataAmount,
-		self.srcPort,self.dstPort,1)
-		
-		self.destination.initiateTCP(self.source,0,self.dstPort,self.srcPort,0)
+	def doNext(self,action):
+		if action == 'init':
+			self.source.initiateTCP(self.destination,self.dataAmount,1)
+			
+			self.destination.initiateTCP(self.source,0,0)

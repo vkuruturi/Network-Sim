@@ -4,45 +4,67 @@ from packet import IPHeader, TCPHeader, Packet
 from heapq import heappush
 
 class Host:
-	def __init__(self,name,ipAddress,algorithm,h):
-		self.name = name
-		self.ipAddress = ipAddress
-		self.link = []
-		self.queue = []
-		hostList.append(self)
-		self.tcpAlgorithm = algorithm	
+	def __init__(self, name, ipAddress, algorithm, h):
+		self.name = name				#string identifer of object
+		self.tcpAlgorithm = algorithm	#algoritm string
+		self.ipAddress = ipAddress		#for routing algoritms
+		self.handler = h				#global time keeper
+		self.queue = []					#list of packets ready to be sent
+		self.tcp = []					#list of tcp connections
 		self.handler = h
-		self.timer = 0
 		
-	def doNext(self):
-		if self.handler.getTime() >= self.timer:
-			self.tcp.timeout()
+	def setLink(self,link):				#set link connection
+		self.link = link
+
+	def wipeQueue(self):
+		self.queue = []
+		
+	def doNext(self,action):
+		if action == 'push':
+			if len(self.queue):
+				p = self.queue.pop(0)
+				print 'Host',self.name,'is attempting to push packet',p.tcpHeader.sequenceNumber
+				self.link.recvPacket(p)
+				if len(self.queue) >= 1:
+					print 'Host',self.name,'transmitting again'
+					self.beginTransmit()
+				else:
+					print 'Host',self.name,'ending transmission'
+					return
+			else:
+				print 'Nothing in queue, cannot push'
 	
-	def attemptTransmit(self):
-		for i in range (len(self.queue) ):
-			p = self.queue.pop(0)
-			self.link[0].recvPacket(p)
-		if self.sender:
-			t = self.handler.getTime()
-			self.timer = t + 2.0
-			heappush(eventQueue,(t+2.0,self) )
+	def beginTransmit(self):						#begin transmitting next packet in queue
+		t = self.handler.getTime()					#set the time
+		p = self.queue[0]							#look at next packet
+		ttp = t + (p.size/self.link.rate)			#time to push to link
+		heappush(eventQueue, (ttp, self, 'push'))
 		
+	def findTCP(self,destination):
+		for i in range( len(self.tcp) ):				#loop through all TCP's
+			if self.tcp[i].destination == destination:	#if one has a matching destination
+				return self.tcp[i]						#return it
+		print 'Error no TCP connection has that destination'
 			
-	def initiateTCP(self,destination,size,srcPort,dstPort,sender):
-		self.sender = sender
+	def initiateTCP(self, destination, size, isSource):
+		self.isSource = isSource							#isSource is a bool indicating flow source
 		if self.tcpAlgorithm == 'TCP Reno':
-			if sender == 1:
-				ipHeader = IPHeader(15,self.ipAddress,destination.ipAddress)
-				self.tcp = TCPRenoSender(size,srcPort,dstPort,ipHeader,self)
-				self.tcp.createPacketsInRange(1,2)
-				self.attemptTransmit()
-			elif sender == 0:
-				ipHeader = IPHeader(15,self.ipAddress,destination.ipAddress)
-				self.tcp = TCPRenoReceiver(0,srcPort,dstPort,ipHeader,self)
+			if isSource == 1:
+				maxHops = 15 								#this may be changed to some variable
+				ipHeader = IPHeader(maxHops, self.ipAddress, destination.ipAddress)	#create IP header
+				self.tcp.append( TCPRenoSender(size, ipHeader, self, destination, self.handler) )	#creates a new TCP connection
+				tempTCP = self.findTCP(destination)
+				tempTCP.timeoutTime = self.handler.getTime() + tempTCP.timeoutDelay
+				heappush(eventQueue, (tempTCP.timeoutTime, tempTCP, 'checkTimeout') )
+				tempTCP.putPacket(1)								#find TCP corresponding to destination
+				self.beginTransmit()											
+			elif isSource == 0:
+				ipHeader = IPHeader(15,self.ipAddress,destination.ipAddress)		#for the case of the receiver:
+				self.tcp.append(TCPRenoReceiver(0, ipHeader,self,destination))
 			else:
 				print 'Error, not sender or receiver'
 		else:
 			print 'Error, not a valid TCP choice'
 
 	def recvPacket(self,p):
-		self.tcp.recvPacket(p)
+		self.findTCP(p.origSender).recvPacket(p)

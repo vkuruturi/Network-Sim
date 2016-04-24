@@ -13,9 +13,7 @@ class IPHeader:
 #header checksum, fragment offset, protocol, options
 
 class TCPHeader:
-	def __init__(self,srcPort,destPort,seq,ack,cwnd):
-		self.sourcePort = srcPort
-		self.destinationPort = destPort
+	def __init__(self,seq,ack,cwnd):
 		self.sequenceNumber = seq
 		self.acknowledgeNumber = ack
 		self.windowSize = cwnd
@@ -26,11 +24,12 @@ class TCPHeader:
 #padding, Data
 
 class Packet:
-	def __init__(self,tcpHeader,ipHeader,size,sender):
-		self.tcpHeader = tcpHeader
-		self.ipHeader = ipHeader
-		self.sender = sender
-		self.size = size
+	def __init__(self,tcpHeader,ipHeader,size,immSender,origSender):
+		self.tcpHeader 	= tcpHeader
+		self.ipHeader 	= ipHeader
+		self.immSender 	= immSender
+		self.origSender = origSender
+		self.size 		= size
 
 
 
