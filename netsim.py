@@ -24,8 +24,6 @@ F2 = flow.Flow('F2',H2,H1,2**22,4.0,'TCP Reno',81,81,h)
 
 print 'Simulation is beginning'
 
-windowList = []
-
 while(True):
 	eventObject = heapq.heappop(eventQueue)		#Find the object ready to do next event
 	h.setTime(eventObject[0])					#set the global time
@@ -37,11 +35,11 @@ while(True):
 	#windowList.append(H1.tcp[0].window)
 
 print 'Simulation time: ' , h.getTime()
-print 'global time var: ' , globals.time
+
 # graph stuff	
 
+# print data rate at receiver for each flow
 for i in range(len(flowList)):
-
 	data = flowList[i].dstTCP.recvTime
 	print 'First packet received at : ', data[0]
 	print 'Size of recvTime         : ', len(data)
@@ -66,12 +64,9 @@ for i in range(len(flowList)):
 	for j in range(0,len(speed)):
 		time_axis.append(0.05 + .1*j)
 
-	plt.plot(H1.tcp[0].windowList)
-	plt.plot(L1.bufferList)
 	fig = plt.figure()
 	plot1 = fig.add_subplot(111)
-#	print 'size of time_axis: ', len(time_axis)
-#	print 'size of speed    : ', len(speed)
+
 	plot1.plot(time_axis,speed,color='blue')
 	plot1.set_xlim([0,max_t])
 	plot1.set_ylim([0,max(speed)])
