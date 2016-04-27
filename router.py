@@ -29,6 +29,7 @@ class Router:
 				distancetables[self][link.c1] = [link.cost, link.c1];
 		self.sendDSDV();
 	def sendDSDV(self):
+		self.updateDSDV();
 		DSDV_packet = RouterPacket(64, true, distancetables[self], self)
 		for link in links:
 			heappush(eventQueue, (self, self.h.getTime() + DSDV_packet.size/(link.rate), "SEND DSDV"))
@@ -50,7 +51,7 @@ class Router:
 		else:
 			p.immSender = self;	
 			self.sendPacket(p);
-	def sendPacket(self, p):
+	def senderPacket(self, p):
 		min_ipdiff = 10000000000000000;
 		min_key;
 		for key in self.distancetables:
@@ -64,6 +65,13 @@ class Router:
 				neighbor[1].recvPacket(p);
 				heappush(eventQueue, ((time+(p.size / neighbor[1].rate)), self, "send_packet"))
 				break
+
+	def updateDSDV(self):
+		for link in links:
+			if link.c1 == self:
+				distancetables[self][link.c2] = [link.getAndUpdateCost(), link.c2];
+			else:
+				distancetables[self][link.c1] = [link.getAndUpdateCost(), link.c1];
 
 	def doNext(self, action):
 		if action == "NEW DSDV":
