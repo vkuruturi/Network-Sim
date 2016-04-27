@@ -24,12 +24,20 @@ class TCPHeader:
 #padding, Data
 
 class Packet:
-	def __init__(self,tcpHeader,ipHeader,size,immSender,origSender):
+	def __init__(self,tcpHeader,ipHeader,size,immSender,origSender, isDistancePacket):
 		self.tcpHeader 	= tcpHeader
 		self.ipHeader 	= ipHeader
 		self.immSender 	= immSender
 		self.origSender = origSender
 		self.size 		= size
+		self.isDistancePacket = isDistancePacket;
 
+
+class RouterPacket:
+	def __init__(self, size, isDistancePacket, DSDV_data, sender):
+		self.size = size;
+		self.isDistancePacket = isDistancePacket;
+		self.DSDV_data = DSDV_data;
+		self.sender = sender;
 
 
