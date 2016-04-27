@@ -22,6 +22,7 @@ class Link:
         self.queue = []                      #packet objects in link's queue/buffer
         
         self.bufferList = []
+        self.cost;
         
     def recvPacket(self,p):
         t = self.handler.getTime()                      	#store current time in t
@@ -48,6 +49,10 @@ class Link:
             self.c1.recvPacket(p)
         else:
             print 'Error packet does not match either object'
+
+    def getAndUpdateCost(self):
+        self.cost = (self.bufferBytes / self.rate) + self.delay;
+        return self.cost;
         
     def doNext(self,action):
         if action == 'send':
