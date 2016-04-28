@@ -22,7 +22,11 @@ class Link:
         self.queue = []                      #packet objects in link's queue/buffer
         
         self.bufferList = []
-        self.cost;
+        self.cost = delay
+        # if (self.c1.initialized == 0):
+        self.c1.sendDSDV();
+        # if (self.c2.initialized == 0):
+        self.c2.sendDSDV();
         
     def recvPacket(self,p):
         t = self.handler.getTime()                      	#store current time in t
@@ -37,6 +41,7 @@ class Link:
                 print 'Error, neither sender',self.c1.name,'nor',self.c2.name,'may send to link',self.name
             self.queue.append(p)
             self.bufferBytes += p.size
+            print p.immSender.name, 'sent packet with ttd', ttd
             heappush(eventQueue, (ttd,self,'send') )		#schedule an event where the packet is tranfered
         else:
             print p.immSender.name,'dropped a packet on link',self.name
@@ -56,14 +61,14 @@ class Link:
         
     def doNext(self,action):
         if action == 'send':
+            print 'popping'
             p = self.queue.pop(0)
             if p.immSender == self.c1:
                 dest = self.c2
             else:
                 dest = self.c1
-            print 'Link',self.name,'is sending packet',p.tcpHeader.sequenceNumber,'from',p.immSender.name,'to',dest.name
-            self.sendPacket(p)
-
-        
+            if (not p.isDistancePacket):
+                print 'Link',self.name,'is sending packet',p.tcpHeader.sequenceNumber,'from',p.immSender.name,'to',dest.name
+            self.sendPacket(p);
             
         

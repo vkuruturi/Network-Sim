@@ -10,31 +10,35 @@ import flow
 import tcpRenoSR
 
 class Router:
-	def _init_(self, name, ipAddress, h):
+	def __init__(self, name, ipAddress, h):
 		self.name = name;
 		self.ipAddress = ipAddress
 		self.links = []
 		self.queue = []
 		routerList.append(self)
 		self.handler = h;
-		self.distancetables = defaultdict(dict);
+		self.distancetables = defaultdict(dict); #Distance Vector table, each entry is
+		#a tuple of the minimum route (i.e. which host or router to send it to) and the
+		#minimum cost to send to
 		self.neighbors = [];
-		distancetables[self][self] = [0, self];
-		for link in links:
-			if link.c1 == self:
-				self.neighbors.append([link.c2, link]);
-				distancetables[self][link.c2] = [link.cost, link.c2];
-			else:
-				self.neighbors.append([link.c1, link]);
-				distancetables[self][link.c1] = [link.cost, link.c1];
-		self.sendDSDV();
+		self.distancetables[self][self] = [0, self];
+		self.initialized = 0;
+	def setLink(self, link):
+		self.links.append(link);
+		print "appended ", link.name;
 	def sendDSDV(self):
+		# if (self.initialized == 0):
+		# 	self.initialized = 1;
+		print self.name, "is sending its DSDV data"
 		self.updateDSDV();
-		DSDV_packet = RouterPacket(64, true, distancetables[self], self)
-		for link in links:
-			heappush(eventQueue, (self, self.h.getTime() + DSDV_packet.size/(link.rate), "SEND DSDV"))
-			heappush(eventQueue, (self, self.h.getTime() + 1, "NEW DSDV"))
+		for link in self.links:
+			print link.name
+		DSDV_packet = packet.RouterPacket(64, self.distancetables[self], self)
+		DSDV_packet.immSender = self;
+		for link in self.links:
 			link.recvPacket(DSDV_packet);
+			heappush(eventQueue, (self.handler.getTime() + DSDV_packet.size/(link.rate), self, "SEND DSDV"))
+			heappush(eventQueue, (self.handler.getTime() + 100, self, "NEW DSDV"))
 	def recvPacket(self, p):
 		if p.isDistancePacket:
 			self.distancetables[p.sender] = p.DSDV_data
@@ -46,33 +50,44 @@ class Router:
 					if (cost < min_cost):
 						min_cost = cost;
 						min_rout = key2;
-				distancetables[self][key][1] = min_rout;
+				self.distancetables[self][key][1] = min_rout;
 
-		else:
+		elif (not(p.isDistancePacket)):
 			p.immSender = self;	
 			self.sendPacket(p);
-	def senderPacket(self, p):
+	def sendPacket(self, p):
 		min_ipdiff = 10000000000000000;
-		min_key;
-		for key in self.distancetables:
-			if ((key.ipAddress - p.ipHeader.destinationAddress) < min_ipdiff):
+		min_key = self;
+		for key in self.distancetables[self]:
+			print 'key name', key.name
+			print 'key ip address', key.ipAddress, 'packet ipAddress', p.ipHeader.destinationAddress;
+			difference = key.ipAddress - p.ipHeader.destinationAddress;
+			if (difference < 0) :
+				difference = difference * (-1);
+			if (difference < min_ipdiff):
 				min_key = key
-		send_to = distancetables[self][min_key][1];
+		send_to = self.distancetables[self][min_key][1];
 		time = self.handler.getTime();
+		print self.name, 'is sending packet ', p.tcpHeader.sequenceNumber, 'with source', p.origSender.name, 'to ', send_to.name,
 
-		for neighbor in neighbors:
+		for neighbor in self.neighbors:
 			if (neighbor[0] == send_to):
 				neighbor[1].recvPacket(p);
 				heappush(eventQueue, ((time+(p.size / neighbor[1].rate)), self, "send_packet"))
 				break
 
 	def updateDSDV(self):
-		for link in links:
+		print self.name, "is updating its DSDV"
+		for link in self.links:
+			print 'link name: ', link.name
 			if link.c1 == self:
-				distancetables[self][link.c2] = [link.getAndUpdateCost(), link.c2];
+				print 'other side of link', link.c2.name
+				self.neighbors.append([link.c2, link]);
+				self.distancetables[self][link.c2] = [link.getAndUpdateCost(), link.c2];
 			else:
-				distancetables[self][link.c1] = [link.getAndUpdateCost(), link.c1];
-
+				print 'other side of link', link.c1.name
+				self.neighbors.append([link.c1, link]);
+				self.distancetables[self][link.c1] = [link.getAndUpdateCost(), link.c1];
 	def doNext(self, action):
 		if action == "NEW DSDV":
 			self.sendDSDV();
