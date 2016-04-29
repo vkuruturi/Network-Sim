@@ -17,13 +17,15 @@ print 'Setting up network objects...'
 h = EventHandler()
 #The following is representative of inputs
 #it establishes objects - hosts routers, links, and flows
-H1 = host.Host('H1',0,'TCP Reno',h)
-H2 = host.Host('H2',2,'TCP Reno',h)
-R1 = router.Router('R1', 1, h)
-L1 = link.Link('L1',10.0,10.0,64.0,H1,R1,h)
-L2 = link.Link('L2', 10.0, 10.0, 64.0, H2, R1, h)
-F1 = flow.Flow('F1',H1,H2,2**14,4.0,'TCP Tahoe',80,80,h)
-F2 = flow.Flow('F2',H2,H1,2**14,4.0,'TCP Tahoe',81,81,h)
+H1 = host.Host('H1',0,'TCP Tahoe',h)
+H2 = host.Host('H2',3,'TCP Tahoe',h)
+# R1 = router.Router('R1', 1, h)
+# R2 = router.Router('R2', 2, h)
+L1 = link.Link('L1',10.0,10.0,64.0,H1,H2,h)
+# L2 = link.Link('L2', 10.0, 10.0, 64.0, R1, R2, h)
+# L3 = link.Link('L3', 10.0, 10.0, 64.0, R2, H2, h)
+F1 = flow.Flow('F1',H1,H2,2**15,4.0,'TCP Tahoe',80,80,h)
+F2 = flow.Flow('F2',H2,H1,2**15,4.0,'TCP Tahoe',81,81,h)
 
 print 'Simulation is beginning'
 

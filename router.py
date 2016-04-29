@@ -23,6 +23,7 @@ class Router:
 		self.neighbors = [];
 		self.distancetables[self][self] = [0, self];
 		self.initialized = 0;
+		self.isRouter = 1;
 	def setLink(self, link):
 		self.links.append(link);
 		print "appended ", link.name;
@@ -38,8 +39,8 @@ class Router:
 			return
 		print self.name, "is sending its DSDV data"
 		self.updateDSDV();
-		for link in self.links:
-			print link.name
+		# for link in self.links:
+		# 	print link.name
 		DSDV_packet = packet.RouterPacket(64, self.distancetables[self], self)
 		DSDV_packet.immSender = self;
 		for link in self.links:
@@ -49,14 +50,16 @@ class Router:
 	def recvPacket(self, p):
 		if p.isDistancePacket:
 			self.distancetables[p.sender] = p.DSDV_data
+			print self.name, 'received distance packet before updating is: ', self.distancetables
 			for key in self.distancetables[self]:
 				min_cost = self.distancetables[self][key][0];
 				min_rout = key;
 				for key2 in self.distancetables[self]:
-					cost = self.distancetables[self][key2][0] + self.distancetables[key2][key][0];
-					if (cost < min_cost):
-						min_cost = cost;
-						min_rout = key2;
+					if key2.isRouter == 1:						
+						cost = self.distancetables[self][key2][0] + self.distancetables[key2][key][0];
+						if (cost < min_cost):
+							min_cost = cost;
+							min_rout = key2;
 				self.distancetables[self][key][1] = min_rout;
 
 		elif (not(p.isDistancePacket)):
@@ -79,10 +82,18 @@ class Router:
 		print self.name, 'is sending packet ', p.tcpHeader.sequenceNumber, 'with source', p.origSender.name, 'to ', send_to.name,
 
 		for neighbor in self.neighbors:
-			if (neighbor[0] == send_to):
-				neighbor[1].recvPacket(p);
-				heappush(eventQueue, ((time+(p.size / neighbor[1].rate)), self, "send_packet"))
-				break
+			if neighbor[0].isRouter == 0:
+				if neighbor[0].ipAddress == p.ipHeader.destinationAddress:
+					neighbor[1].recvPacket(p);
+					heappush(eventQueue, ((time+(p.size / neighbor[1].rate)), self, "send_packet"))
+					return
+
+		for neighbor in self.neighbors:
+			if neighbor[0].isRouter == 1:
+				if (neighbor[0] == send_to):
+					neighbor[1].recvPacket(p);
+					heappush(eventQueue, ((time+(p.size / neighbor[1].rate)), self, "send_packet"))
+					return
 
 	def updateDSDV(self):
 		print self.name, "is updating its DSDV"
@@ -91,11 +102,13 @@ class Router:
 			if link.c1 == self:
 				print 'other side of link', link.c2.name
 				self.neighbors.append([link.c2, link]);
-				self.distancetables[self][link.c2] = [link.getAndUpdateCost(), link.c2];
+				if link.c2.isRouter == 1:
+					self.distancetables[self][link.c2] = [link.getAndUpdateCost(), link.c2];
 			else:
 				print 'other side of link', link.c1.name
 				self.neighbors.append([link.c1, link]);
-				self.distancetables[self][link.c1] = [link.getAndUpdateCost(), link.c1];
+				if link.c1.isRouter == 1:
+					self.distancetables[self][link.c1] = [link.getAndUpdateCost(), link.c1];
 		print 'new distancetables:', self.distancetables
 	def doNext(self, action):
 		if action == "NEW DSDV":
