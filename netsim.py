@@ -35,10 +35,10 @@ with open('input.txt') as input:
 		if line == 'Hosts:':
 			section[0] = 1
 			continue
-#		elif line == 'Routers:':
-#			section[1] = 1
-#			section[0] = 0
-#			continue
+		elif line == 'Routers:':
+			section[1] = 1
+			section[0] = 0
+			continue
 		elif line == 'Links:':
 			section[2] = 1
 			section[1] = 0
