@@ -15,7 +15,7 @@ class TCPRenoSender:
 		self.maxSeq = dataAmt
 		self.state = 'Slow start'
 		self.timeoutTime = float('inf')
-		self.tcpFinished = False
+		self.tcpFinished = 0
 		self.handler = h
 		self.timeoutDelay = 1.0
 	
@@ -27,6 +27,7 @@ class TCPRenoSender:
 		
 	def timeout(self):
 		if self.state == 'Done':
+			self.tcpFinished = 1;
 			return
 		else:
 			self.ssThresh = self.window/2

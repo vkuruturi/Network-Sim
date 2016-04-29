@@ -13,6 +13,7 @@ class Host:
 		self.tcp = []					#list of tcp connections
 		self.handler = h
 		self.initialized = 1;
+		self.handler.getHostList().append(self);
 		
 	def setLink(self,link):				#set link connection
 		self.link = link

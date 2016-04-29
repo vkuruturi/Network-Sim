@@ -68,7 +68,7 @@ class Link:
             else:
                 dest = self.c1
             if (not p.isDistancePacket):
-                print 'Link',self.name,'is sending packet',p.tcpHeader.sequenceNumber,'from',p.immSender.name,'to',dest.name
+                print 'Link',self.name,'is sending packet',p.tcpHeader.sequenceNumber,'from',p.immSender.name, 'with source', p.origSender.name, 'to',dest.name
             self.sendPacket(p);
             
         

@@ -22,8 +22,8 @@ H2 = host.Host('H2',2,'TCP Reno',h)
 R1 = router.Router('R1', 1, h)
 L1 = link.Link('L1',10.0,10.0,64.0,H1,R1,h)
 L2 = link.Link('L2', 10.0, 10.0, 64.0, H2, R1, h)
-F1 = flow.Flow('F1',H1,H2,2**22,4.0,'TCP Reno',80,80,h)
-F2 = flow.Flow('F2',H2,H1,2**22,4.0,'TCP Reno',81,81,h)
+F1 = flow.Flow('F1',H1,H2,2**14,4.0,'TCP Tahoe',80,80,h)
+F2 = flow.Flow('F2',H2,H1,2**14,4.0,'TCP Tahoe',81,81,h)
 
 print 'Simulation is beginning'
 

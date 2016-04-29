@@ -29,6 +29,13 @@ class Router:
 	def sendDSDV(self):
 		# if (self.initialized == 0):
 		# 	self.initialized = 1;
+		stop = 0;
+		for host in self.handler.getHostList():
+			for tcpConnection in host.tcp:
+				if (tcpConnection.isSource == 1):
+					stop = tcpConnection.tcpFinished;
+		if (stop == 1):
+			return
 		print self.name, "is sending its DSDV data"
 		self.updateDSDV();
 		for link in self.links:
@@ -65,6 +72,7 @@ class Router:
 			if (difference < 0) :
 				difference = difference * (-1);
 			if (difference < min_ipdiff):
+				min_ipdiff = difference
 				min_key = key
 		send_to = self.distancetables[self][min_key][1];
 		time = self.handler.getTime();
@@ -88,6 +96,7 @@ class Router:
 				print 'other side of link', link.c1.name
 				self.neighbors.append([link.c1, link]);
 				self.distancetables[self][link.c1] = [link.getAndUpdateCost(), link.c1];
+		print 'new distancetables:', self.distancetables
 	def doNext(self, action):
 		if action == "NEW DSDV":
 			self.sendDSDV();
