@@ -1,0 +1,7 @@
+Hosts:
+H1,0,TCP Reno
+H2,2,TCP Reno
+Links:
+L1,10.0,10.0,64.0,H1,H2
+Flows:
+F1,H1,H2,22,0.0,80,80

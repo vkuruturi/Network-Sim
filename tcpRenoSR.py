@@ -26,6 +26,9 @@ class TCPRenoSender:
 		self.handler = h
 		self.tcpFinished = 0
 
+		self.sentTime = []
+
+
 	def doNext(self,action):
 		if action == 'checkTimeout' and not self.tcpFinished:
 			print 'timeout occurred on',self.parentHost.name
@@ -95,6 +98,7 @@ class TCPRenoSender:
 		tcpHeader = TCPHeader(seq,self.ack,self.window)
 		ipHeader = self.ipHeader
 		p = Packet(tcpHeader,self.ipHeader,1024,self.parentHost,self.parentHost)
+		self.sentTime.append(globals.time)
 		self.parentHost.queue.append(p)
 			
 	def fastRetransmit(self):

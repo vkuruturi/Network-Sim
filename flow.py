@@ -3,18 +3,18 @@ from globals import *
 from heapq import heappush
 
 class Flow:
-	def __init__(self,name,source,destination,amount,start,algo,srcPort,dstPort,h):
+	def __init__(self,name,source,destination,amount,start,srcPort,dstPort,h):
 		self.name = name
 		self.source = source
 		self.destination = destination
 		self.dataAmount = amount
 		self.startTime = start
-		self.Algorithm = algo
+	#	self.Algorithm = algo
 		self.srcPort = srcPort
 		self.dstPort = dstPort
 		self.srcTCP = []
 		self.dstTCP = []
-		flowList.append(self)
+		#flowList.append(self)
 		heappush(eventQueue,(self.startTime,self,'init'))
 		
 	def doNext(self,action):
