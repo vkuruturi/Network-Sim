@@ -2,6 +2,7 @@ from globals import hostList,linkList,routerList,flowList,eventQueue,time
 from tcpRenoSR import TCPRenoSender, TCPRenoReceiver
 from packet import IPHeader, TCPHeader, Packet
 from heapq import heappush
+from tcpTahoeSR import TCPTahoeSender, TCPTahoeReceiver
 
 class Host:
 	def __init__(self, name, ipAddress, algorithm, h):
@@ -26,13 +27,13 @@ class Host:
 		if action == 'push':
 			if len(self.queue):
 				p = self.queue.pop(0)
-				print 'Host',self.name,'is attempting to push packet',p.tcpHeader.sequenceNumber
+				#print 'Host',self.name,'is attempting to push packet',p.tcpHeader.sequenceNumber
 				self.link.recvPacket(p)
 				if len(self.queue) >= 1:
-					print 'Host',self.name,'transmitting again'
+					#print 'Host',self.name,'transmitting again'
 					self.beginTransmit()
 				else:
-					print 'Host',self.name,'ending transmission'
+					#print 'Host',self.name,'ending transmission'
 					return
 			else:
 				print 'Nothing in queue, cannot push'
@@ -77,7 +78,7 @@ class Host:
 			if isSource == 1:
 				maxHops = 15 								#this may be changed to some variable
 				ipHeader = IPHeader(maxHops, self.ipAddress, destination.ipAddress)	#create IP header
-				self.tcp.append( TCPRenoSender(size, ipHeader, self, destination, self.handler) )	#creates a new TCP connection
+				self.tcp.append(TCPTahoeSender(size, ipHeader, self, destination, self.handler) )	#creates a new TCP connection
 				tempTCP = self.findTCP(destination,isSource)
 				flow.srcTCP = tempTCP
 				tempTCP.timeoutTime = self.handler.getTime() + tempTCP.timeoutDelay
@@ -86,7 +87,7 @@ class Host:
 				self.beginTransmit()
 			elif isSource == 0:
 				ipHeader = IPHeader(15,self.ipAddress,destination.ipAddress)		#for the case of the receiver:
-				self.tcp.append(TCPRenoReceiver(0, ipHeader,self,destination))
+				self.tcp.append(TCPTahoeReceiver(0, ipHeader,self,destination))
 				tempTCP = self.findTCP(destination,isSource)
 				flow.dstTCP = tempTCP
 			else:
@@ -96,7 +97,8 @@ class Host:
 			print 'Error, not a valid TCP choice'
 
 	def recvPacket(self,p):
-		if p.size == 64:
-			self.findTCP(p.origSender,1).recvPacket(p)
-		if p.size == 1024:
-			self.findTCP(p.origSender,0).recvPacket(p)
+		if (not p.isDistancePacket):
+			if p.size == 64:
+				self.findTCP(p.origSender,1).recvPacket(p)
+			if p.size == 1024:
+				self.findTCP(p.origSender,0).recvPacket(p)

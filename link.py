@@ -30,7 +30,7 @@ class Link:
         
     def recvPacket(self,p):
         t = self.handler.getTime()                      	#store current time in t
-        print 'current size is',self.bufferBytes
+        #print 'current size is',self.bufferBytes
         self.bufferList.append(self.bufferBytes)
         if self.bufferBytes + p.size <= self.bufferSize:	#if buffer full, reject packet
             if p.immSender == self.c1:                      #wait until link is clear of
@@ -41,7 +41,7 @@ class Link:
                 print 'Error, neither sender',self.c1.name,'nor',self.c2.name,'may send to link',self.name
             self.queue.append(p)
             self.bufferBytes += p.size
-            print p.immSender.name, 'sent packet with ttd', ttd
+            #print p.immSender.name, 'sent packet with ttd', ttd
             heappush(eventQueue, (ttd,self,'send') )		#schedule an event where the packet is tranfered
         else:
             print p.immSender.name,'dropped a packet on link',self.name

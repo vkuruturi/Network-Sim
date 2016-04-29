@@ -58,7 +58,6 @@ class TCPRenoSender:
 		elif p.tcpHeader.acknowledgeNumber > self.maxSeq:
 			print 'TCP done sending packets'
 			self.parentHost.timeoutTime = float('inf')
-			self.parentHost.wipeQueue()
 			self.tcpFinished = 1
 			
 		else:
