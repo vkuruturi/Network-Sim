@@ -26,6 +26,9 @@ class Link:
 
         self.droppedPackets = []
         self.droppedPacketsTimestamps = []
+        self.droppedPackets.append(0)
+        self.droppedPacketsTimestamps.append(0)
+        #globals.linkList.append(self)
 
     def recvPacket(self,p):
         t = self.handler.getTime()                      	#store current time in t

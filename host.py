@@ -29,6 +29,8 @@ class Host:
 			if len(self.queue):
 				p = self.queue.pop(0)
 				print 'Host',self.name,'is attempting to push packet',p.tcpHeader.sequenceNumber
+				self.dataSentTimestamps.append(self.handler.getTime())
+				self.dataSent.append(p.size)
 				self.link.recvPacket(p)
 				if len(self.queue) >= 1:
 					print 'Host',self.name,'transmitting again'
@@ -43,7 +45,6 @@ class Host:
 		t = self.handler.getTime()					#set the time
 		p = self.queue[0]							#look at next packet
 		ttp = t + (p.size/self.link.rate)			#time to push to link
-		self.dataSentTimestamps.append(t)
 		heappush(eventQueue, (ttp, self, 'push'))
 		
 	def findTCP(self,destination,isSource):
