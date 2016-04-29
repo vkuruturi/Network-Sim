@@ -17,6 +17,7 @@ class Flow:
 		heappush(eventQueue,(self.startTime,self,'init'))
 		
 	def doNext(self,action):
+		#create TCP objects at the hosts
 		if action == 'init':
 			self.source.initiateTCP(self.destination,self.dataAmount,1,self)
 			

@@ -116,8 +116,6 @@ with open('input.txt') as input:
 
 print 'Simulation is beginning'
 
-windowList = []
-
 while(True):
 	eventObject = heapq.heappop(eventQueue)		#Find the object ready to do next event
 	h.setTime(eventObject[0])					#set the global time
@@ -150,6 +148,7 @@ for i in range(len(flowList)):
 	max_t = math.ceil(max(dataRecv))		#maximumm time required
 	recvSpeed = []										#average speed over 0.1 seconds
 	sendSpeed = []
+
 	it = 0
 	count = 0
 	time_axis = []
@@ -316,6 +315,7 @@ plt.xlabel("Time (s)")
 
 
 plt.show()
+
 
 
 print 'Simulation Completed'
