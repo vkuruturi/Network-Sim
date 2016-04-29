@@ -47,7 +47,8 @@ fig1 = plt.figure(1)
 fig1.suptitle('Data received by TCP receivers')
 fig2 = plt.figure(2)
 fig2.suptitle('Data sent by TCP senders')
-
+fig3 = plt.figure(3)
+fig3.suptitle('Window Size for the senders')
 
 for i in range(len(flowList)):
 	dataRecv = flowList[i].dstTCP.recvTime			#array of times when receiver got a packet
@@ -114,8 +115,8 @@ plt.ylabel("Speed (Kbps)")
 plt.figure(2)
 plt.legend()
 #plt.ylim(ylim)
-fig2.xlabel("Time (s)")
-fig2.ylabel("Speed (Kbps)")
+plt.xlabel("Time (s)")
+plt.ylabel("Speed (Kbps)")
 
 
 plt.figure(3)
