@@ -12,7 +12,12 @@ class Host:
 		self.queue = []					#list of packets ready to be sent
 		self.tcp = []					#list of tcp connections
 		self.handler = h
-		
+
+		self.dataReceived = []
+		self.dataReceivedTimestamps = []
+		self.dataSent = []
+		self.dataSentTimestamps = []
+
 	def setLink(self,link):				#set link connection
 		self.link = link
 
@@ -24,6 +29,8 @@ class Host:
 			if len(self.queue):
 				p = self.queue.pop(0)
 				print 'Host',self.name,'is attempting to push packet',p.tcpHeader.sequenceNumber
+				self.dataSentTimestamps.append(self.handler.getTime())
+				self.dataSent.append(p.size)
 				self.link.recvPacket(p)
 				if len(self.queue) >= 1:
 					print 'Host',self.name,'transmitting again'
@@ -50,6 +57,7 @@ class Host:
 		print self.name,'is initializing tcp, isSource =',isSource
 		print 'destination is',destination.name
 		self.isSource = isSource							#isSource is a bool indicating flow source
+
 		if self.tcpAlgorithm == 'TCP Reno':
 			if isSource == 1:
 				maxHops = 15 								#this may be changed to some variable
@@ -61,13 +69,16 @@ class Host:
 				heappush(eventQueue, (tempTCP.timeoutTime, tempTCP, 'checkTimeout') )
 				tempTCP.putPacket(1)								#find TCP corresponding to destination
 				self.beginTransmit()											
+
 			elif isSource == 0:
 				ipHeader = IPHeader(15,self.ipAddress,destination.ipAddress)		#for the case of the receiver:
 				self.tcp.append(TCPRenoReceiver(0, ipHeader,self,destination))
 				tempTCP = self.findTCP(destination,isSource)
 				flow.dstTCP = tempTCP
+
 			else:
 				print 'Error, not sender or receiver'
+
 		elif self.tcpAlgorithm == 'TCP Tahoe':
 			if isSource == 1:
 				maxHops = 15 								#this may be changed to some variable
@@ -79,6 +90,7 @@ class Host:
 				heappush(eventQueue, (tempTCP.timeoutTime, tempTCP, 'checkTimeout') )
 				tempTCP.putPacket(1)								#find TCP corresponding to destination
 				self.beginTransmit()
+
 			elif isSource == 0:
 				ipHeader = IPHeader(15,self.ipAddress,destination.ipAddress)		#for the case of the receiver:
 				self.tcp.append(TCPRenoReceiver(0, ipHeader,self,destination))
@@ -91,6 +103,8 @@ class Host:
 			print 'Error, not a valid TCP choice'
 
 	def recvPacket(self,p):
+		self.dataReceivedTimestamps.append(self.handler.getTime())
+		self.dataReceived.append(p.size)
 		if p.size == 64:
 			self.findTCP(p.origSender,1).recvPacket(p)
 		if p.size == 1024:
