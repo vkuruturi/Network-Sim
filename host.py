@@ -34,7 +34,6 @@ class Host:
 			if len(self.queue):
 				p = self.queue.pop(0)
 
-				print 'Host',self.name,'is attempting to push packet',p.tcpHeader.sequenceNumber
 				self.dataSentTimestamps.append(self.handler.getTime())
 				self.dataSent.append(p.size)
 
@@ -45,9 +44,7 @@ class Host:
 				else:
 					#print 'Host',self.name,'ending transmission'
 					return
-			else:
-				print 'Nothing in queue, cannot push'
-	
+
 	def beginTransmit(self):						#begin transmitting next packet in queue
 		t = self.handler.getTime()					#set the time
 		p = self.queue[0]							#look at next packet
@@ -58,7 +55,7 @@ class Host:
 		for i in range( len(self.tcp) ):							#loop through all TCP's
 			if self.tcp[i].destination == destination and self.tcp[i].isSource == isSource:	#if one has a matching destination and source
 				return self.tcp[i]						#return it
-		print 'Error no TCP connection has that destination'
+		print 'Error, no TCP connection has that destination'
 	def sendDSDV(self):
 		swag = "Sahil"
 			

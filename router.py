@@ -29,7 +29,7 @@ class Router:
 		self.links.append(link);
 		#print "appended ", link.name;
 	def sendDSDV(self):
-		print self.handler.getTime(), "Sending DSDV"
+		#print self.handler.getTime(), "Sending DSDV"
 		# if (self.initialized == 0):
 		# 	self.initialized = 1;
 		stop = 0;
@@ -65,13 +65,13 @@ class Router:
 						if not key2 in self.distancetables[key]:
 							self.distancetables[key][key2] = [100000000000000, key2];
 				self.distancetables[key][key] = [0, key];
-			print self.name, 'received distance packet before updating is: ', self.distancetables
+			#print self.name, 'received distance packet before updating is: ', self.distancetables
 			for key in self.distancetables[self]:
 				min_cost = self.distancetables[self][key][0];
 				min_rout = key;
 				for key2 in self.distancetables[self]:
 					if key2.isRouter == 1:
-						print key, key2					
+						#print key, key2
 						cost = self.distancetables[self][key2][0] + self.distancetables[key2][key][0];
 						if (cost < min_cost):
 							min_cost = cost;
@@ -79,7 +79,7 @@ class Router:
 				self.distancetables[self][key][1] = min_rout;
 
 		elif (not(p.isDistancePacket)):
-			print "NOT DISTANCE"
+			#print "NOT DISTANCE"
 			p.immSender = self;	
 			self.count = self.count + 1;
 			if  (self.count % 500) == 0:

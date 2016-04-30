@@ -58,7 +58,6 @@ with open('input.txt') as input:
 			algo = inputList[2]
 			H = host.Host(name,ip,algo,h)
 			hostList.append(H)
-			print 'HI'
 
 		if section[1]:
 			name = inputList[0]
@@ -91,7 +90,6 @@ with open('input.txt') as input:
 			linkList.append(L)
 
 		if section[3]:
-			print 's3'
 			name = inputList[0]
 			c1 = inputList[1]
 			c2 = inputList[2]
@@ -131,7 +129,6 @@ while(True):
 	#windowList.append(H1.tcp[0].window)
 
 print 'Simulation time: ' , h.getTime()
-print 'global time var: ' , globals.time
 
 
 # graph stuff
@@ -195,11 +192,9 @@ for i in range(len(flowList)):
 
 	plt.figure(2)
 	l = flowList[i].source.name + " Port " + `flowList[i].srcPort`
-	print l
 	plt.plot(time_axis,sendSpeed,label=l,color=colors[i%8])
 
 	k = len(flowList[i].srcTCP.windowList)
-	print k
 	plt.figure(3)
 	plt.plot(range(1,k+1), flowList[i].srcTCP.windowList ,label=l,color=colors[i%8])
 

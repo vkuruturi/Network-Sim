@@ -37,7 +37,6 @@ class Link:
 
     def recvPacket(self,p):
         t = self.handler.getTime()                      	#store current time in t
-        print 'current size is',self.bufferBytes
         #self.bufferList.append(self.bufferBytes)
 
         if self.bufferBytes + p.size <= self.bufferSize:	#if buffer full, reject packet
@@ -70,7 +69,7 @@ class Link:
         elif p.immSender == self.c2:
             self.c1.recvPacket(p)
         else:
-            print 'Error packet does not match either object'
+            print 'Error, packet does not match either object'
 
     def getAndUpdateCost(self):
         self.cost = (self.bufferBytes / self.rate) + self.delay;
@@ -78,14 +77,13 @@ class Link:
         
     def doNext(self,action):
         if action == 'send':
-            print 'popping'
+            #print 'popping'
             p = self.queue.pop(0)
             if p.immSender == self.c1:
                 dest = self.c2
             else:
                 dest = self.c1
             if (not p.isDistancePacket):
-                print 'Link',self.name,'is sending packet',p.tcpHeader.sequenceNumber,'from',p.immSender.name, 'with source', p.origSender.name, 'to',dest.name
-            self.sendPacket(p);
+                self.sendPacket(p);
             
         

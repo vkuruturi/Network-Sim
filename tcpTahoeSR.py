@@ -37,7 +37,7 @@ class TCPTahoeSender:
         if self.state == 'Done':
             return
         else:
-            print 'timing out'
+            #print 'timing out'
             self.ssThresh = self.window/2.0
             self.window = 1
             self.dupACKs = 0
@@ -55,7 +55,7 @@ class TCPTahoeSender:
                 self.dupACKs += 1
                 if self.dupACKs == 3:
                     self.ssThresh = self.ssThresh/2.0
-                    print self.ssThresh
+                    #print self.ssThresh
                     self.window = 1
                     self.largestSent = p.tcpHeader.acknowledgeNumber
                     self.dupACKs = 0
@@ -64,7 +64,7 @@ class TCPTahoeSender:
                     self.state = 'Slow start'
             elif p.tcpHeader.acknowledgeNumber > self.maxSeq:
                 self.state = 'Done'
-                print 'Done'
+                #print 'Done'
             else:
                 self.largestACK = p.tcpHeader.acknowledgeNumber
                 self.window = self.window + 1
@@ -72,7 +72,7 @@ class TCPTahoeSender:
                 self.generatePackets()
                 if self.window >= self.ssThresh:
                     self.state = 'Congestion avoidance'
-                    print 'entering Congestion avoidance'
+                    #print 'entering Congestion avoidance'
         elif self.state == 'Congestion avoidance':
             if p.tcpHeader.acknowledgeNumber <= self.largestACK:
                 self.dupACKs += 1
@@ -80,14 +80,14 @@ class TCPTahoeSender:
                     self.ssThresh = max(self.window,self.ssThresh)/2.0
                     self.window = 1
                     self.dupACKs = 0
-                    print self.ssThresh
+                    #print self.ssThresh
                     self.largestACK = p.tcpHeader.acknowledgeNumber
                     self.putPacket(p.tcpHeader.acknowledgeNumber)
                     self.state = 'Slow start'
-                    print 'entering slow start'
+                    #print 'entering slow start'
             elif p.tcpHeader.acknowledgeNumber > self.maxSeq:
                 self.state = 'Done'
-                print 'Done'
+                #print 'Done'
             else:
                 self.largestACK = p.tcpHeader.acknowledgeNumber
                 self.window = self.window+(1.0/int(self.window))
@@ -111,7 +111,7 @@ class TCPTahoeSender:
             self.putPacket(i)
         heappush(eventQueue, (self.timeoutTime, self, 'checkTimeout') )
         self.parentHost.beginTransmit()
-        print 'largest ACK is',self.largestACK
+        #print 'largest ACK is',self.largestACK
            
 class TCPTahoeReceiver:
     def __init__(self, size, ipHeader, parentHost, destination):
