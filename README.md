@@ -9,6 +9,7 @@ Hosts:
 1. String name of host
 2. IP Address, decimal
 3. Algorithm running on host as source
+4. 
 Example:
 
 Host1,1,TCP Reno
@@ -19,6 +20,7 @@ Routers:
 
 1. String name of router
 2. IP Address, decimal
+
 Example:
 
 Router1,2
@@ -31,6 +33,7 @@ Links:
 4. buffer size in KB
 5. Name of first connection
 6. Name of second connection
+
 Example:
 
 Link1,10,1,64,Host1,Router1
@@ -44,6 +47,7 @@ Flows:
 5. Start time of flow in seconds
 6. port number of receiver
 7. port number of destination
+
 Example:
 
 Flow1,Host1,Host2,12,1,80,80
