@@ -11,7 +11,7 @@ class TCPTahoeSender:
         self.window = 1.0
         self.ssThresh = 10
         self.dupACKs = 0
-        self.largestACK = 0
+        self.largestACK = 1
         self.largestSent = 1
         self.ipHeader = ipHeader
         self.parentHost = parentHost
@@ -25,12 +25,16 @@ class TCPTahoeSender:
         self.time_list = []
        
         self.plot_list = []
+        self.windowList = []
+        self.sentTime = []
    
     def doNext(self,action):
         #print 'checking timeout'
         if action == 'Check timeout' and not (self.state == 'Done'):
             t = self.handler.getTime()
+            #print 'checking timeout'
             if self.timeoutTime <= t:
+                print 'timed out'
                 self.timeout()
        
     def timeout(self):
@@ -38,12 +42,15 @@ class TCPTahoeSender:
             return
         else:
             #print 'timing out'
+
             self.ssThresh = self.window/2.0
             self.window = 1
+            self.windowList.append(self.window)
             self.dupACKs = 0
             self.state = 'Slow start'
             self.largestSent = self.largestACK
             self.putPacket(self.largestACK)
+            self.parentHost.beginTransmit()
        
     def recvPacket(self,p):
         self.plot_list.append(floor(self.window))
@@ -53,10 +60,12 @@ class TCPTahoeSender:
         elif self.state == 'Slow start':
             if p.tcpHeader.acknowledgeNumber <= self.largestACK:
                 self.dupACKs += 1
+
                 if self.dupACKs == 3:
                     self.ssThresh = self.ssThresh/2.0
                     #print self.ssThresh
                     self.window = 1
+                    self.windowList.append(self.window)
                     self.largestSent = p.tcpHeader.acknowledgeNumber
                     self.dupACKs = 0
                     self.putPacket(p.tcpHeader.acknowledgeNumber)
@@ -68,6 +77,7 @@ class TCPTahoeSender:
             else:
                 self.largestACK = p.tcpHeader.acknowledgeNumber
                 self.window = self.window + 1
+                self.windowList.append(self.window)
                 self.dupACKs = 0
                 self.generatePackets()
                 if self.window >= self.ssThresh:
@@ -79,6 +89,7 @@ class TCPTahoeSender:
                 if self.dupACKs == 3:
                     self.ssThresh = max(self.window,self.ssThresh)/2.0
                     self.window = 1
+                    self.windowList.append(self.window)
                     self.dupACKs = 0
                     #print self.ssThresh
                     self.largestACK = p.tcpHeader.acknowledgeNumber
@@ -91,6 +102,7 @@ class TCPTahoeSender:
             else:
                 self.largestACK = p.tcpHeader.acknowledgeNumber
                 self.window = self.window+(1.0/int(self.window))
+                self.windowList.append(self.window)
                 self.dupACKs = 0
                 self.generatePackets()
                
@@ -100,6 +112,10 @@ class TCPTahoeSender:
         tcpHeader = TCPHeader(seq,self.ack,self.window)
         ipHeader = self.ipHeader
         p = Packet(tcpHeader,self.ipHeader,1024,self.parentHost,self.parentHost)
+        self.sentTime.append(self.handler.getTime())
+        #print self.handler.getTime()
+        self.timeoutTime = self.handler.getTime() + self.timeoutDelay
+        heappush(eventQueue, (self.timeoutTime, self, 'Check timeout'))
         self.parentHost.queue.append(p)
         self.largestPacketSent = seq
                
@@ -109,7 +125,8 @@ class TCPTahoeSender:
             if i > self.maxSeq:
                 return
             self.putPacket(i)
-        heappush(eventQueue, (self.timeoutTime, self, 'checkTimeout') )
+        self.timeoutTime = self.handler.getTime() + self.timeoutDelay
+        heappush(eventQueue, (self.timeoutTime, self, 'Check timeout') )
         self.parentHost.beginTransmit()
         #print 'largest ACK is',self.largestACK
            
@@ -130,6 +147,8 @@ class TCPTahoeReceiver:
         self.destination = destination
        
     def recvPacket(self,p):
+        #print "got packet!"
+        self.recvTime.append(globals.time)
         i = p.tcpHeader.sequenceNumber - self.windowStart
         self.windowList[i] = 1
         need = 0

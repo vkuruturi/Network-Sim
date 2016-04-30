@@ -79,6 +79,10 @@ class Link:
         if action == 'send':
             #print 'popping'
             p = self.queue.pop(0)
+#            if not p.isDistancePacket:
+                #print p.tcpHeader.acknowledgeNumber, '  ', p.tcpHeader.sequenceNumber
+#            else:
+                #print p.DSDV_data
             if p.immSender == self.c1:
                 dest = self.c2
             else:

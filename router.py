@@ -97,6 +97,7 @@ class Router:
 			if (difference < min_ipdiff):
 				min_ipdiff = difference
 				min_key = key
+				#print ' closest through router' , key.name
 		send_to = self.distancetables[self][min_key][1];
 		time = self.handler.getTime();
 		#print self.name, 'is sending packet ', p.tcpHeader.sequenceNumber, 'with source', p.origSender.name, 'to ', send_to.name,
@@ -106,6 +107,7 @@ class Router:
 				if neighbor[0].ipAddress == p.ipHeader.destinationAddress:
 					neighbor[1].recvPacket(p);
 					heappush(eventQueue, ((time+(p.size / neighbor[1].rate)), self, "send_packet"))
+					#rint 'router ', self.name , ' sending packet to ', neighbor.
 					return
 
 		for neighbor in self.neighbors:
@@ -129,6 +131,6 @@ class Router:
 				self.neighbors.append([link.c1, link]);
 				if link.c1.isRouter == 1:
 					self.distancetables[self][link.c1] = [link.getAndUpdateCost(), link.c1]
-		#print 'new distancetables:', self.distancetables
+		#print 'router ' ,self.name, ' new distancetables:', self.distancetables
 	def doNext(self, action):
 		return

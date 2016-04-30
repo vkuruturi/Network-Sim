@@ -217,9 +217,9 @@ plt.xlabel("RTT")
 plt.ylabel("Window Size")
 
 #plot link statistics
-print len(linkList)
+#print len(linkList)
 for i in range(len(linkList)):
-	print i
+	#print i
 	bufferSz = linkList[i].bufferList
 	times = linkList[i].bufferTimestamps
 	droppedPackets = linkList[i].droppedPackets
