@@ -93,8 +93,9 @@ class Host:
 				tempTCP = self.findTCP(destination,isSource)
 				flow.srcTCP = tempTCP
 				tempTCP.timeoutTime = self.handler.getTime() + tempTCP.timeoutDelay
-				heappush(eventQueue, (tempTCP.timeoutTime, tempTCP, 'checkTimeout') )
+				heappush(eventQueue, (tempTCP.timeoutTime, tempTCP, 'Check timeout') )
 				tempTCP.putPacket(1)								#find TCP corresponding to destination
+				print 'TCP Tahoe start '
 				self.beginTransmit()
 
 			elif isSource == 0:

@@ -30,7 +30,7 @@ class TCPRenoSender:
 
 
 	def doNext(self,action):
-		if action == 'checkTimeout' and not self.tcpFinished:
+		if action == 'check Timeout' and not self.tcpFinished:
 			#print 'timeout occurred on',self.parentHost.name
 			#print self.timeoutTime
 			t = self.handler.getTime()
@@ -46,7 +46,7 @@ class TCPRenoSender:
 		self.parentHost.wipeQueue()
 		self.parentHost.queue.append(p)
 		self.timeoutTime = self.handler.getTime() + self.timeoutDelay
-		heappush(eventQueue, (self.timeoutTime, self, 'checkTimeout') )
+		heappush(eventQueue, (self.timeoutTime, self, 'check Timeout') )
 		self.parentHost.beginTransmit()
 
 	def recvPacket(self,p):
@@ -91,7 +91,7 @@ class TCPRenoSender:
 				self.largestSentPacket = p.tcpHeader.sequenceNumber
 			if seq:
 				self.timeoutTime = self.handler.getTime() + self.timeoutDelay
-				heappush(eventQueue, (self.timeoutTime, self, 'checkTimeout') )
+				heappush(eventQueue, (self.timeoutTime, self, 'check Timeout') )
 				self.parentHost.beginTransmit()
 			
 	def putPacket(self,seq):
@@ -108,7 +108,7 @@ class TCPRenoSender:
 		self.parentHost.queue.append(p)
 		self.largestSentPacket = max(p.tcpHeader.sequenceNumber,self.largestSentPacket) #might be something wrong with this line.
 		self.timeoutTime = self.handler.getTime() + self.timeoutDelay
-		heappush(eventQueue, (self.timeoutTime, self, 'checkTimeout') )
+		heappush(eventQueue, (self.timeoutTime, self, 'check Timeout') )
 		self.parentHost.beginTransmit()
 		self.ssthresh = self.ssthresh/2
 		self.window = self.window/2
