@@ -57,7 +57,7 @@ class Link:
         else:
             self.droppedPackets.append(self.droppedPackets[-1] +1)
             self.droppedPacketsTimestamps.append(globals.time)
-            print p.immSender.name,'dropped a packet on link',self.name
+            print p.immSender.name,'dropped a packet with ack', p.tcpHeader.acknowledgeNumber, 'and seq ', p.tcpHeader.sequenceNumber,' on link',self.name
             
     def sendPacket(self,p):
         self.bufferBytes -= p.size

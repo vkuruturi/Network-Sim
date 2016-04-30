@@ -1,0 +1,21 @@
+Hosts:
+S1,0,TCP Reno
+S2,2,TCP Reno
+T2,4,TCP Reno
+S3,6,TCP Reno
+T1,8,TCP Reno
+T3,9,TCP Reno
+Routers:
+R1,1
+R2, 3
+R3, 5
+R4, 7
+Links:
+L0,12.5,10.0,64.0,H1,R1
+L1,10.0,10.0,64.0,R1,R2
+L2,10.0,10.0,64.0,R1,R3
+L3,10.0,10.0,64.0,R2,R3
+L4,10.0,10.0,64.0,R3,R4
+L5,12.5,10.0,64.0,R4,H2
+Flows:
+F1,H1,H2,20,0.0,80,80

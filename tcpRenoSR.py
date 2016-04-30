@@ -120,7 +120,7 @@ class TCPRenoReceiver:
 		self.ack = 0
 		self.windowStart = 1
 		self.windowList = []
-		for i in range(2**14):
+		for i in range(2**18):
 			self.windowList.append(0)
 		self.ipHeader = ipHeader
 		self.lastSeqReceived = 0	
