@@ -30,6 +30,15 @@ class Packet:
 		self.immSender 	= immSender
 		self.origSender = origSender
 		self.size 		= size
+		self.isDistancePacket = False;
 
+
+class RouterPacket:
+	def __init__(self, size, DSDV_data, sender):
+		self.size = size;
+		self.isDistancePacket = True;
+		self.DSDV_data = DSDV_data;
+		self.sender = sender;
+		self.immSender = sender;
 
 

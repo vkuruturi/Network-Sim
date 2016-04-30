@@ -9,6 +9,7 @@ import packet
 import flow
 import tcpRenoSR
 import math
+import router
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -34,10 +35,10 @@ with open('input.txt') as input:
 		if line == 'Hosts:':
 			section[0] = 1
 			continue
-#		elif line == 'Routers:':
-#			section[1] = 1
-#			section[0] = 0
-#			continue
+		elif line == 'Routers:':
+			section[1] = 1
+			section[0] = 0
+			continue
 		elif line == 'Links:':
 			section[2] = 1
 			section[1] = 0
@@ -57,7 +58,6 @@ with open('input.txt') as input:
 			algo = inputList[2]
 			H = host.Host(name,ip,algo,h)
 			hostList.append(H)
-			print 'HI'
 
 		if section[1]:
 			name = inputList[0]
@@ -90,7 +90,6 @@ with open('input.txt') as input:
 			linkList.append(L)
 
 		if section[3]:
-			print 's3'
 			name = inputList[0]
 			c1 = inputList[1]
 			c2 = inputList[2]
@@ -116,9 +115,12 @@ with open('input.txt') as input:
 
 print 'Simulation is beginning'
 
+windowList = []
+
 while(True):
 	eventObject = heapq.heappop(eventQueue)		#Find the object ready to do next event
-	h.setTime(eventObject[0])					#set the global time
+	h.setTime(eventObject[0])
+	#print eventObject[2].name					#set the global time
 	eventObject[1].doNext(eventObject[2])		#Do the event
 	#print 'top of queue : ',eventObject[0]
 	if len(eventQueue) == 0:
@@ -127,7 +129,6 @@ while(True):
 	#windowList.append(H1.tcp[0].window)
 
 print 'Simulation time: ' , h.getTime()
-print 'global time var: ' , globals.time
 
 
 # graph stuff
@@ -191,11 +192,9 @@ for i in range(len(flowList)):
 
 	plt.figure(2)
 	l = flowList[i].source.name + " Port " + `flowList[i].srcPort`
-	print l
 	plt.plot(time_axis,sendSpeed,label=l,color=colors[i%8])
 
 	k = len(flowList[i].srcTCP.windowList)
-	print k
 	plt.figure(3)
 	plt.plot(range(1,k+1), flowList[i].srcTCP.windowList ,label=l,color=colors[i%8])
 
@@ -319,3 +318,4 @@ plt.show()
 
 
 print 'Simulation Completed'
+

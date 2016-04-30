@@ -10,3 +10,6 @@ class EventHandler:
 
 	def setTime(self,t):
 		globals.time = t
+
+	def getHostList(self):
+		return globals.hostList

@@ -2,6 +2,7 @@ from globals import hostList,linkList,routerList,flowList,eventQueue,time
 from tcpRenoSR import TCPRenoSender, TCPRenoReceiver
 from packet import IPHeader, TCPHeader, Packet
 from heapq import heappush
+from tcpTahoeSR import TCPTahoeSender, TCPTahoeReceiver
 
 class Host:
 	def __init__(self, name, ipAddress, algorithm, h):
@@ -12,6 +13,10 @@ class Host:
 		self.queue = []					#list of packets ready to be sent
 		self.tcp = []					#list of tcp connections
 		self.handler = h
+
+		self.initialized = 1;
+		#self.handler.getHostList().append(self);
+		self.isRouter = 0;
 
 		self.dataReceived = []
 		self.dataReceivedTimestamps = []
@@ -28,19 +33,18 @@ class Host:
 		if action == 'push':
 			if len(self.queue):
 				p = self.queue.pop(0)
-				print 'Host',self.name,'is attempting to push packet',p.tcpHeader.sequenceNumber
+
 				self.dataSentTimestamps.append(self.handler.getTime())
 				self.dataSent.append(p.size)
+
 				self.link.recvPacket(p)
 				if len(self.queue) >= 1:
-					print 'Host',self.name,'transmitting again'
+					#print 'Host',self.name,'transmitting again'
 					self.beginTransmit()
 				else:
-					print 'Host',self.name,'ending transmission'
+					#print 'Host',self.name,'ending transmission'
 					return
-			else:
-				print 'Nothing in queue, cannot push'
-	
+
 	def beginTransmit(self):						#begin transmitting next packet in queue
 		t = self.handler.getTime()					#set the time
 		p = self.queue[0]							#look at next packet
@@ -51,7 +55,9 @@ class Host:
 		for i in range( len(self.tcp) ):							#loop through all TCP's
 			if self.tcp[i].destination == destination and self.tcp[i].isSource == isSource:	#if one has a matching destination and source
 				return self.tcp[i]						#return it
-		print 'Error no TCP connection has that destination'
+		print 'Error, no TCP connection has that destination'
+	def sendDSDV(self):
+		swag = "Sahil"
 			
 	def initiateTCP(self, destination, size, isSource, flow):
 		print self.name,'is initializing tcp, isSource =',isSource
@@ -83,7 +89,7 @@ class Host:
 			if isSource == 1:
 				maxHops = 15 								#this may be changed to some variable
 				ipHeader = IPHeader(maxHops, self.ipAddress, destination.ipAddress)	#create IP header
-				self.tcp.append( TCPRenoSender(size, ipHeader, self, destination, self.handler) )	#creates a new TCP connection
+				self.tcp.append(TCPTahoeSender(size, ipHeader, self, destination, self.handler) )	#creates a new TCP connection
 				tempTCP = self.findTCP(destination,isSource)
 				flow.srcTCP = tempTCP
 				tempTCP.timeoutTime = self.handler.getTime() + tempTCP.timeoutDelay
@@ -93,7 +99,7 @@ class Host:
 
 			elif isSource == 0:
 				ipHeader = IPHeader(15,self.ipAddress,destination.ipAddress)		#for the case of the receiver:
-				self.tcp.append(TCPRenoReceiver(0, ipHeader,self,destination))
+				self.tcp.append(TCPTahoeReceiver(0, ipHeader,self,destination))
 				tempTCP = self.findTCP(destination,isSource)
 				flow.dstTCP = tempTCP
 			else:
@@ -103,9 +109,10 @@ class Host:
 			print 'Error, not a valid TCP choice'
 
 	def recvPacket(self,p):
-		self.dataReceivedTimestamps.append(self.handler.getTime())
-		self.dataReceived.append(p.size)
-		if p.size == 64:
-			self.findTCP(p.origSender,1).recvPacket(p)
-		if p.size == 1024:
-			self.findTCP(p.origSender,0).recvPacket(p)
+		if (not p.isDistancePacket):
+			self.dataReceivedTimestamps.append(self.handler.getTime())
+			self.dataReceived.append(p.size)
+			if p.size == 64:
+				self.findTCP(p.origSender,1).recvPacket(p)
+			if p.size == 1024:
+				self.findTCP(p.origSender,0).recvPacket(p)

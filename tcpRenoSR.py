@@ -31,8 +31,8 @@ class TCPRenoSender:
 
 	def doNext(self,action):
 		if action == 'checkTimeout' and not self.tcpFinished:
-			print 'timeout occurred on',self.parentHost.name
-			print self.timeoutTime
+			#print 'timeout occurred on',self.parentHost.name
+			#print self.timeoutTime
 			t = self.handler.getTime()
 			if self.timeoutTime <= t:
 				self.timeout()
@@ -50,18 +50,17 @@ class TCPRenoSender:
 		self.parentHost.beginTransmit()
 
 	def recvPacket(self,p):
-		print self.parentHost.name,'received ack',p.tcpHeader.acknowledgeNumber
-		print self.parentHost.name,'RTT_NUM: ',self.rtt_seq_num
+		#print self.parentHost.name,'received ack',p.tcpHeader.acknowledgeNumber
+		#print self.parentHost.name,'RTT_NUM: ',self.rtt_seq_num
 		if p.tcpHeader.acknowledgeNumber <= self.largestACK:
 			self.dupACK += 1
-			print 'duplicate ack received'
+			#print 'duplicate ack received'
 			if self.dupACK == 3:
 				self.fastRetransmit()
 				
 		elif p.tcpHeader.acknowledgeNumber > self.maxSeq:
-			print 'TCP done sending packets'
+			#print 'TCP done sending packets'
 			self.parentHost.timeoutTime = float('inf')
-			self.parentHost.wipeQueue()
 			self.tcpFinished = 1
 			
 		else:
@@ -103,7 +102,7 @@ class TCPRenoSender:
 		self.parentHost.queue.append(p)
 			
 	def fastRetransmit(self):
-		print self.parentHost.name, 'is fast retransmitting...'
+		#print self.parentHost.name, 'is fast retransmitting...'
 		tcpHeader = TCPHeader(self.largestACK,self.ack,self.window)
 		p = Packet(tcpHeader,self.ipHeader,1024,self.parentHost,self.parentHost)
 		self.parentHost.queue.append(p)
@@ -132,7 +131,7 @@ class TCPRenoReceiver:
 		windowSizeList = []
 
 	def recvPacket(self,p):
-		print self.parentHost.name,'received packet ',p.tcpHeader.sequenceNumber
+		#print self.parentHost.name,'received packet ',p.tcpHeader.sequenceNumber
 
 		# Log packet receive time 
 		self.recvTime.append(globals.time)
@@ -148,7 +147,7 @@ class TCPRenoReceiver:
 
 		if need:
 			ack = need + self.windowStart
-			print 'receiver is creating ack',ack
+			#print 'receiver is creating ack',ack
 			tcpHeader = TCPHeader(ack,ack,len(self.windowList))
 			p = Packet(tcpHeader,self.ipHeader,64,self.parentHost,self.parentHost)
 			self.parentHost.queue.append(p)
